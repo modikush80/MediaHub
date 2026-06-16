@@ -55,6 +55,30 @@ Runtime state (settings, job state, trash, logs, manifests, AI side-DBs, the pri
 `pyenv/`) all live under `~/Library/Application Support/MediaHub/` — never in the repo or
 app bundle, so the app can be read-only and updated without losing data.
 
+## Install on another Mac
+
+**Option A — DMG (recommended, near-zero dependencies):**
+```bash
+bash tools/build_dmg.sh          # -> ~/Desktop/MediaHub-Installer.dmg
+```
+On a build Mac (Xcode CLT + internet) this produces a self-contained app that **bundles**:
+- a **standalone Python** runtime (no system Python needed on the target), and
+- the **prebuilt Apple Vision + Face tools** (no Xcode needed on the target).
+
+Copy the `.dmg` over → open → drag **MediaHub.app** to Applications → first launch
+**right-click → Open** (unsigned, macOS asks once). Then bring your `media_indexer.sqlite3`
+(or re-index via **New Trip Ingest**). Only **MLX AI accelerators** install on demand
+(**Search → On-device components**). Notarizing away the Gatekeeper prompt needs a paid
+Apple Developer account.
+
+**Option B — git clone (for development):**
+```bash
+xcode-select --install                               # git + python3 + swiftc
+git clone https://github.com/<you>/MediaHub.git ~/Desktop/MediaHub
+cd ~/Desktop/MediaHub && python3 -m mediahub          # http://127.0.0.1:8765
+```
+Update later with `git pull`. The inventory DB is **not** in the repo (it's your data).
+
 ## The core workflow — stage a trip
 
 1. **Settings** → pick a **destination** (Local SSD or Mounted drive / NAS) with the

@@ -39,12 +39,17 @@ def _tool() -> Path | None:
     vd = _vision_dir()
     if not vd:
         return None
-    binp = CACHE_DIR / "face_detect"
     src = vd / "face_detect.swift"
+    # Prefer a prebuilt binary bundled next to the source (e.g. inside the .app),
+    # so Vision/Faces work with no Xcode CLT / swiftc on the target Mac.
+    bundled = vd / "face_detect"
+    if bundled.exists() and (not src.exists() or bundled.stat().st_mtime >= src.stat().st_mtime):
+        return bundled
+    binp = CACHE_DIR / "face_detect"
     if binp.exists() and binp.stat().st_mtime >= src.stat().st_mtime:
         return binp
     if not shutil.which("swiftc"):
-        return binp if binp.exists() else None
+        return binp if binp.exists() else (bundled if bundled.exists() else None)
     _flog("Building Swift face tool (one-time)…\n")
     r = subprocess.run(
         ["swiftc", "-O", "-framework", "Vision", "-framework", "AppKit",
@@ -58,7 +63,8 @@ def _tool() -> Path | None:
 
 def faces_available() -> dict:
     vd = _vision_dir()
-    has_bin = (CACHE_DIR / "face_detect").exists()
+    bundled = bool(vd and (vd / "face_detect").exists())
+    has_bin = bundled or (CACHE_DIR / "face_detect").exists()
     has_swiftc = bool(shutil.which("swiftc"))
     ok = bool(vd) and (has_bin or has_swiftc)
     return {"available": ok, "has_binary": has_bin, "has_swiftc": has_swiftc,

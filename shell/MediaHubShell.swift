@@ -29,6 +29,12 @@ final class Backend: ObservableObject {
     }
 
     private func pythonPath() -> String? {
+        // Prefer a Python bundled inside the app (zero external dependency).
+        if let res = Bundle.main.resourceURL?.appendingPathComponent("python/bin/python3").path,
+           FileManager.default.isExecutableFile(atPath: res) {
+            return res
+        }
+        // Fall back to a system Python.
         let cands = ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/usr/bin/python3"]
         return cands.first { FileManager.default.isExecutableFile(atPath: $0) }
     }

@@ -26,6 +26,7 @@ shell/icongen
 # Built native app bundles / archives
 *.app/
 *.zip
+*.dmg
 
 # Runtime data & databases (live in ~/Library/Application Support/MediaHub)
 *.sqlite3
