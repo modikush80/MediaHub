@@ -71,6 +71,11 @@ Copy the `.dmg` over → open → drag **MediaHub.app** to Applications → firs
 (**Search → On-device components**). Notarizing away the Gatekeeper prompt needs a paid
 Apple Developer account.
 
+Publish the built DMG as a downloadable GitHub release (one-time `brew install gh && gh auth login`):
+```bash
+gh release create v2.0 ~/Desktop/MediaHub-Installer.dmg -t "MediaHub 2.0" -n "Drag-to-install DMG — bundles Python + prebuilt Vision/Face tools."
+```
+
 **Option B — git clone (for development):**
 ```bash
 xcode-select --install                               # git + python3 + swiftc
