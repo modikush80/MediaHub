@@ -13,6 +13,19 @@ sidebar app, light/dark/Aurora themes), optionally wrapped in a native SwiftUI w
 
 > Deep architecture & rationale: see **[DESIGN.md](DESIGN.md)**.
 
+## Screenshots
+
+> Shown with placeholder demo data — not real library contents.
+
+![Overview](docs/screenshots/overview.png)
+
+| Stage to Destination | Semantic Search (on-device) |
+|---|---|
+| ![Stage](docs/screenshots/stage.png) | ![Search](docs/screenshots/search.png) |
+
+*Screenshots are generated from the real UI with fake data via
+`python3 tools/make_screenshots.py` (headless Chrome) — no personal data.*
+
 ## Safety first
 
 - Your original photos/videos are **never modified, moved, renamed, or deleted**.
