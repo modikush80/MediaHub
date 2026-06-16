@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>MediaHub</title>
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Apply saved theme + accent before paint to avoid a flash.
+  try {
+    var t = localStorage.getItem("mh_theme");
+    var a = localStorage.getItem("mh_accent");
+    if (t && t !== "auto") document.documentElement.setAttribute("data-theme", t);
+    if (a && a !== "blue") document.documentElement.setAttribute("data-accent", a);
+  } catch (e) {}
+</script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 2.6 20.4 7.3v9.4L12 21.4 3.6 16.7V7.3z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" opacity="0.95"/><path d="M10 8.7 15.2 12 10 15.3z" fill="#fff"/></svg></div>
+      <div><h1>MediaHub</h1><div class="ver">Archive Pipeline</div></div>
+    </div>
+    <div class="navitem active" data-view="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Overview</div>
+    <div class="navitem" data-view="guide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Guide</div>
+    <div class="navitem" data-view="trips">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 16l20-7-7 20-3-8-10-5z"/></svg>
+      Trips</div>
+    <div class="navitem" data-view="sources">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      Sources</div>
+    <div class="navitem" data-view="dedupe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M3 16V5a2 2 0 012-2h11"/></svg>
+      Duplicates</div>
+    <div class="nav-sec">Workflow</div>
+    <div class="navitem" data-view="stage">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      Stage to Destination</div>
+    <div class="navitem" data-view="ingest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9v10a2 2 0 002 2h14a2 2 0 002-2V9"/><path d="M7 14l5-5 5 5"/><path d="M12 9v11"/><path d="M3 9l9-6 9 6"/></svg>
+      New Trip Ingest</div>
+    <div class="nav-sec ai-sec">
+      <span class="ai-glow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14"><defs><linearGradient id="aig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF5FA2"/><stop offset=".5" stop-color="#9B6BFF"/><stop offset="1" stop-color="#40C8E0"/></linearGradient></defs><path d="M12 2c1.2 4.2 3.6 6.6 7.8 7.8C15.6 11 13.2 13.4 12 17.6 10.8 13.4 8.4 11 4.2 9.8 8.4 8.6 10.8 6.2 12 2z" fill="url(#aig)"/><circle cx="18.5" cy="17.5" r="2.1" fill="url(#aig)"/></svg>
+      </span>
+      On-Device Apple Intelligence</div>
+    <div class="navitem" data-view="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Semantic Search</div>
+    <div class="navitem" data-view="vision">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg>
+      Vision &amp; OCR</div>
+    <div class="navitem" data-view="culling">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 21h11a2 2 0 002-2V8"/><path d="M9 9l4 4 4-6"/></svg>
+      Smart Culling</div>
+    <div class="navitem" data-view="people">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0111 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15 20a4.5 4.5 0 016-4"/></svg>
+      People</div>
+    <div class="navitem" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings<span class="navbadge hidden" id="trashBadge" title="Files in Trash"></span></div>
+    <div class="spacer"></div>
+    <div class="mountbox" id="mountbox"><div class="muted">Connected drives</div></div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="toolbar">
+      <div><h2 id="tbTitle">Overview</h2><div class="sub" id="tbSub"></div></div>
+      <div id="tbAction"></div>
+    </div>
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <section class="view active" id="overview">
+        <div class="grid">
+          <div class="card stat"><div class="k">Total files</div><div class="v" id="s_files">–</div></div>
+          <div class="card stat"><div class="k">Total size</div><div class="v" id="s_total">–</div></div>
+          <div class="card stat"><div class="k">Unique size</div><div class="v green" id="s_unique">–</div></div>
+          <div class="card stat"><div class="k">Reclaimable</div><div class="v orange" id="s_reclaim">–</div></div>
+        </div>
+        <h3 class="section">Drives in inventory</h3>
+        <div class="listcard"><table id="devtbl"><thead><tr><th>Drive</th><th>Files</th><th>Size (GB)</th></tr></thead><tbody></tbody></table></div>
+        <div class="note accent">MediaHub never modifies your originals — it only <b>copies</b> to your chosen destination. The de-dup plan is a report you review before deleting anything.</div>
+      </section>
+
+      <!-- GUIDE -->
+      <section class="view" id="guide">
+        <div class="note accent" style="margin-bottom:16px">
+          <b>MediaHub only ever reads and copies.</b> It never moves, renames, or deletes your original photos and videos. Every step below is safe — the worst case is you copy something twice.
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">⏱️ First 10 minutes</h3>
+          <ol style="line-height:1.9;padding-left:20px;margin:0">
+            <li><b><a class="gotolink" data-goto="settings">Settings</a></b> → set your <b>destination</b> (Local SSD or NAS) and, optionally, turn on <b>SHA-256 verify</b>.</li>
+            <li><b><a class="gotolink" data-goto="overview">Overview</a></b> → confirm your file counts look right (your indexed archive loaded).</li>
+            <li>Plug in a source drive → <b><a class="gotolink" data-goto="stage">Stage to Destination</a></b> → check it shows <span class="chip trips">connected</span> or <span class="chip events">matched (renamed)</span>.</li>
+            <li>Pick a trip → <b>Preview</b> → <b>Dry run</b> (writes nothing) → <b>Copy</b> (confirm the sheet). Quit/resume anytime.</li>
+            <li>Back from a trip later? <b><a class="gotolink" data-goto="ingest">New Trip Ingest</a></b> → Browse → Scan &amp; ingest, then stage it.</li>
+            <li><b>(Optional) AI:</b> <b><a class="gotolink" data-goto="search">Semantic Search</a></b> → On-device components → enable the engines, then Build embeddings to search by content.</li>
+            <li>Deleted files after backing up? <b><a class="gotolink" data-goto="settings">Settings → Library maintenance</a></b> → Scan for deleted files → review → moves them to <b>Trash</b> (recoverable).</li>
+          </ol>
+          <div class="note" style="margin-top:8px">New here? That's the whole loop. The sections below explain each piece in more depth.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">What MediaHub does</h3>
+          <p class="muted" style="line-height:1.6">
+            It takes a large photo/video archive scattered across external SSDs, understands it
+            (trips, devices, RAW/JPEG, orientation), removes duplicates safely, and <b>copies</b> one
+            trip at a time into a clean <b>Location / Year / Month / raw·edited / images·videos / device</b>
+            structure on your SSD or NAS — resumable across drive swaps and restarts.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">The core workflow — staging a trip</h3>
+          <ol style="line-height:1.85;padding-left:20px">
+            <li><b>Settings</b> → choose your <b>destination</b> (Local SSD or a mounted drive/NAS). Turn on <b>SHA-256 verify</b> for extra safety.</li>
+            <li><b>Stage to Destination</b> → connect the source drive(s). Check the <b>Source drives</b> panel shows them as <span class="chip trips">connected</span> or <span class="chip events">matched (renamed)</span>.</li>
+            <li>Pick a trip → <b>Preview</b> to see the exact folder tree that will be created.</li>
+            <li><b>Dry run</b> → plans the copy and reports counts/sizes <i>without writing anything</i>.</li>
+            <li><b>Copy</b> → confirm the sheet, then MediaHub copies (and verifies) each file. Safe to quit and resume anytime.</li>
+            <li>If a needed drive isn't connected, MediaHub <b>pauses</b> and tells you which drive to attach next, then <b>Continue</b>.</li>
+            <li>When the trip finishes, upload that one folder to your NAS, then use <b>Duplicates</b> to review what's safe to remove yourself.</li>
+          </ol>
+          <div class="note" style="margin-top:6px">Safety chain: <b>Preview → Dry run → Confirm → Copy → Verify</b>. A real copy can never start by accident.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">Source drives &amp; “matched (renamed)”</h3>
+          <p class="muted" style="line-height:1.6">
+            MediaHub recognizes a drive by its identity, not just its name — so if you renamed a drive
+            after indexing it, it still works. The status chips mean:
+          </p>
+          <ul style="line-height:1.8;padding-left:20px">
+            <li><span class="chip trips">connected</span> — mounted under its original name, ready to stage.</li>
+            <li><span class="chip events">matched (renamed)</span> — <b>this is a success state.</b> MediaHub recognized the drive even though it's now mounted under a different name. Nothing more to do — it's ready to stage.</li>
+            <li><span class="chip camera-dumps">ambiguous</span> — more than one drive could match; pick the right one from the dropdown and click <b>Use this</b>.</li>
+            <li><span class="chip unsorted">not connected</span> — attach the drive (or pick the matching mounted volume and click <b>Use this</b>).</li>
+          </ul>
+          <div class="note">After you click <b>Use this</b>, the row updates to <span class="chip events">matched (renamed)</span> — that means it worked and the drive is now linked.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">On-Device Apple Intelligence</h3>
+          <p class="muted" style="line-height:1.6;margin:0 0 8px">All AI runs locally on your Mac — nothing leaves the device. First enable the engines once in <b>Semantic Search → On-device components</b> (installs into MediaHub's own private environment — your system Python is never touched):</p>
+          <ul style="line-height:1.8;padding-left:20px;margin:0 0 10px">
+            <li><b>numpy</b> — faster search ranking.</li>
+            <li><b>MLX CLIP</b> — true visual search (match pixels, not filenames).</li>
+            <li><b>MLX-VLM</b> — AI photo captions (descriptions).</li>
+          </ul>
+          <p style="line-height:1.7;margin:0 0 6px"><b>Semantic Search</b> — find photos by content. Build embeddings, then search “waterfall”, “sunset over water”, even with natural language like “drone shots from 2024” (it auto-applies device/year filters). Results show thumbnails with <b>Open</b> and <b>Reveal in Finder</b>. With the <code>stub</code> backend it matches filenames; MLX matches actual image content.</p>
+          <p style="line-height:1.7;margin:0 0 6px"><b>Vision &amp; OCR</b> — for screenshots &amp; documents. Browse a folder → <b>Run Vision tagging</b> reads the <i>text inside</i> images and buckets them. Search that text (e.g. “rakuten cashback 10%”); click a bucket to expand thumbnails, click again to collapse.</p>
+          <p style="line-height:1.7;margin:0 0 6px"><b>AI captions</b> — describe every photo for full-text search (stub works now; MLX-VLM gives real descriptions).</p>
+          <p style="line-height:1.7;margin:0 0 6px"><b>People</b> — groups faces on-device into person clusters. Private; report-only.</p>
+          <p style="line-height:1.7;margin:0"><b>Smart Culling</b> — finds near-identical/burst shots, suggests one to keep, and gives a CSV plan. It only suggests — it never deletes.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">New trips later</h3>
+          <p class="muted" style="line-height:1.6;margin:0">
+            Back from a trip? <b>New Trip Ingest → Browse → pick the folder → Scan &amp; ingest</b>. It folds
+            the new media into your inventory; then stage it like any other trip. Adding new data never
+            disturbs what's already organized. (Staged trips are also auto-embedded for search.)
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">Deleting files &amp; keeping the database honest</h3>
+          <p class="muted" style="line-height:1.6;margin:0 0 8px">
+            After you back up and delete files from a drive, reconcile the database in
+            <b>Settings → Library maintenance</b>:
+          </p>
+          <ul style="line-height:1.8;padding-left:20px;margin:0">
+            <li><b>Scan for deleted files</b> — only checks files on <b>currently-mounted</b> drives; files on unplugged drives are never touched.</li>
+            <li><b>Remove from index</b> → moves them to <b>Trash</b> (a recovery window, default 30 days). The sidebar badge shows the count.</li>
+            <li><b>Restore</b> anything by mistake, or <b>Empty trash</b> to purge. This only edits database rows — your media files are never deleted by MediaHub.</li>
+            <li>Optional <b>Auto-reconcile on launch</b> toggle (off by default).</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">Pairing with Immich (optional)</h3>
+          <p class="muted" style="line-height:1.6;margin:0">
+            Want a phone app, timeline, and sharing on top of this archive? In <b>Settings → Immich
+            external library</b> click <b>Prepare for Immich</b> — it writes setup notes into your
+            destination so Immich can read the organized folder <i>in place</i> (read-only). MediaHub
+            stays your safe organizer; Immich becomes the browsing layer.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="section" style="margin-top:0">Make it yours</h3>
+          <p class="muted" style="line-height:1.6;margin:0">
+            <b>Settings → Appearance</b> — pick a theme (Auto, Light, Midnight, or the refractive
+            <b>Aurora glass</b>) and an accent color. Changes apply instantly and are remembered.
+          </p>
+        </div>
+      </section>
+
+      <!-- SEARCH -->
+      <section class="view" id="search">
+        <div class="card" style="margin-bottom:18px">
+          <h3 class="section" style="margin-top:0">On-device components</h3>
+          <div class="muted" style="font-size:12px">MediaHub installs accelerators into its own private environment — nothing touches your system Python.</div>
+          <div class="setup-status" id="setupStatus"></div>
+          <div class="row">
+            <button class="btn primary" id="setupAccel">Enable faster search (numpy)</button>
+            <button class="btn bordered" id="setupVision">Enable visual search (MLX CLIP)</button>
+            <button class="btn bordered" id="setupCaptions">Enable AI captions (MLX-VLM)</button>
+          </div>
+          <pre class="log" id="setupLog" style="height:90px;margin-top:12px;display:none"></pre>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <input type="text" id="searchQ" aria-label="Search your archive" placeholder="Search your archive — e.g. iceland waterfall · drone sunset · wedding" style="flex:1;min-width:320px">
+            <button class="btn primary" id="searchBtn">Search</button>
+          </div>
+          <div class="muted" id="searchInfo" style="margin-top:10px;font-size:12px"></div>
+        </div>
+        <div class="listcard hidden" id="searchResultsCard" style="margin-bottom:18px">
+          <table id="searchTbl"><thead><tr><th>Preview</th><th>Score</th><th>File</th><th>Trip</th><th>Device</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <h3 class="section">Embeddings</h3>
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <div class="muted" id="embInfo" style="font-size:12px">Checking…</div>
+            <button class="btn" id="embedBtn">Build / update embeddings</button>
+          </div>
+          <div class="row" style="margin:12px 0">
+            <label class="field" style="flex:1">Folder (optional)
+              <input type="text" id="embUnder" placeholder="Leave empty for all images, or pick a folder of present images"></label>
+            <button class="btn bordered" id="embBrowse" style="align-self:flex-end">Browse…</button>
+            <label class="field">Embed folder directly
+              <span class="switch"><input type="checkbox" id="emb_direct"><span class="track"></span><span class="knob"></span></span></label>
+          </div>
+          <div class="note" id="embBackendNote" style="margin-bottom:0">…</div>
+          <pre class="log" id="embedLog" style="height:160px;margin-top:12px">idle — no embeddings built yet.</pre>
+        </div>
+
+        <h3 class="section">AI captions (describe photos)</h3>
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <div class="muted" id="capInfo" style="font-size:12px">Checking…</div>
+            <button class="btn" id="capBuild">Build / update captions</button>
+          </div>
+          <div class="row" style="margin:12px 0">
+            <input type="text" id="capQ" aria-label="Search photo captions" placeholder="Search descriptions — e.g. people on a beach · a plate of food" style="flex:1;min-width:320px">
+            <button class="btn primary" id="capSearchBtn">Search captions</button>
+          </div>
+          <div class="muted" id="capSearchInfo" style="font-size:12px"></div>
+          <div class="listcard hidden" id="capResultsCard" style="margin-top:12px">
+            <table id="capTbl"><thead><tr><th>Preview</th><th>Caption</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+          <pre class="log" id="capLog" style="height:90px;margin-top:12px;display:none"></pre>
+        </div>
+      </section>
+
+      <!-- TRIPS -->
+      <section class="view" id="trips">
+        <div class="listcard"><table id="tripstbl"><thead><tr>
+          <th>Trip</th><th>Category</th><th>Destination folder</th><th>Unique</th><th>Unique GB</th><th>Dupe GB</th><th>Drives</th>
+        </tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <!-- SOURCES -->
+      <section class="view" id="sources">
+        <p class="muted" style="margin-top:0">Detected from EXIF camera make/model, then extension and filename. Staging groups originals by device and keeps edits separate.</p>
+        <div class="listcard"><table id="srctbl"><thead><tr>
+          <th>Device</th><th>Unique files</th><th>Size (GB)</th><th>Originals</th><th>Edited</th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="note warn"><b>Unknown</b> files lack EXIF make and have generic names — candidates for the Apple Vision content-tagging module. Vision identifies <i>content</i>, not the capture device.</div>
+      </section>
+
+      <!-- DEDUPE -->
+      <section class="view" id="dedupe">
+        <div class="note green">Keeps exactly <b>one copy</b> of every unique file (prefers <code>T7 SSD2 → SSD1 → Past T9</code>) and marks the rest <code>DELETE</code>. Nothing is deleted by the app.</div>
+        <div class="grid">
+          <div class="card stat"><div class="k">Files to delete</div><div class="v orange" id="d_files">–</div></div>
+          <div class="card stat"><div class="k">Space reclaimed</div><div class="v green" id="d_reclaim">–</div></div>
+        </div>
+        <h3 class="section">Reclaimable by drive</h3>
+        <div class="listcard"><table id="d_devtbl"><thead><tr><th>Drive</th><th>Reclaim (GB)</th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <!-- STAGE -->
+      <section class="view" id="stage">
+        <h3 class="section" style="margin-top:0">Source drives</h3>
+        <div class="listcard" style="margin-bottom:18px">
+          <table id="drivesTbl"><thead><tr><th>Indexed drive</th><th>Status</th><th>Mounted as</th><th>Files / GB</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <label class="field">Trip
+              <select id="tripSelect"></select></label>
+            <label class="field">Mode
+              <div class="seg" id="modeSeg">
+                <button data-dry="false" class="on">Copy</button>
+                <button data-dry="true">Dry run</button>
+              </div></label>
+            <label class="field">Verify hash
+              <span class="switch"><input type="checkbox" id="verifyChk"><span class="track"></span><span class="knob"></span></span></label>
+            <div style="flex:1"></div>
+            <button class="btn bordered" id="previewBtn">Preview</button>
+            <button class="btn primary" id="startBtn">Start staging</button>
+          </div>
+          <div class="row" style="margin-top:12px;justify-content:space-between">
+            <div class="muted" style="font-size:12px" id="destLine"></div>
+            <button class="btn bordered" id="destChange" style="padding:4px 12px;font-size:12px">Change destination…</button>
+          </div>
+        </div>
+
+        <div id="previewBox" class="listcard hidden" style="margin-bottom:18px">
+          <table id="pvtbl"><thead><tr><th>Destination folder</th><th>Files</th><th>GB</th></tr></thead><tbody></tbody></table>
+        </div>
+
+        <div id="progBox" class="card hidden">
+          <div class="row" style="justify-content:space-between">
+            <div><b id="pg_trip"></b> <span class="chip" id="pg_mode"></span></div>
+            <div class="muted num" id="pg_counts"></div>
+          </div>
+          <div class="muted" id="pg_states" style="font-size:12px;margin-top:6px"></div>
+          <div class="progress" style="margin:14px 0"><div id="pg_bar"></div></div>
+          <div class="muted" id="pg_current" style="font-size:12px"></div>
+          <div id="pg_msg" class="note hidden"></div>
+          <div id="pg_drives"></div>
+          <div id="pg_errors" class="hidden" style="margin-top:14px">
+            <div class="row" style="justify-content:space-between">
+              <b id="pg_errcount" style="color:var(--red)"></b>
+              <div class="row">
+                <a class="btn bordered" href="/api/stage/errors.csv" id="pg_errcsv">Download error report</a>
+                <button class="btn" id="pg_retry">Retry failed files</button>
+              </div>
+            </div>
+            <div class="listcard" style="margin-top:10px"><table id="pg_errtbl"><thead><tr><th>File</th><th>Reason</th></tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INGEST -->
+      <section class="view" id="ingest">
+        <div class="note accent">Point MediaHub at a freshly-offloaded card, folder, or drive. It runs the indexer, folds the new media into the same database, then it's instantly available to dedupe and stage — no manual steps.</div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <label class="field">Folder or drive to scan
+              <input type="text" id="ingestPath" placeholder="/Volumes/New Card  or  ~/Desktop/Trip Dump"></label>
+            <button class="btn bordered" id="ingestBrowse">Browse…</button>
+            <div style="flex:1"></div>
+            <button class="btn primary" id="ingestBtn">Scan &amp; ingest</button>
+          </div>
+        </div>
+        <h3 class="section">Indexer output</h3>
+        <pre class="log" id="ingestLog">idle — nothing scanned yet.</pre>
+      </section>
+
+      <!-- VISION -->
+      <section class="view" id="vision">
+        <div class="note accent" id="v_avail">Checking Apple Vision availability…</div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <input type="text" id="v_textq" aria-label="Search text inside tagged images" placeholder="Search text inside tagged images — e.g. rakuten cashback 10%" style="flex:1;min-width:320px">
+            <button class="btn primary" id="v_textBtn">Search text</button>
+          </div>
+          <div class="muted" id="v_textInfo" style="font-size:12px;margin-top:8px">Searches the OCR text Vision extracted. Tag a folder first (below) to populate it.</div>
+        </div>
+        <div class="grid">
+          <div class="card stat"><div class="k">Vague candidates</div><div class="v accent" id="v_candidates">–</div></div>
+          <div class="card stat"><div class="k">Tagged so far</div><div class="v green" id="v_tagged">–</div></div>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <label class="field">Max files
+              <input type="text" id="v_limit" value="2000" style="min-width:120px"></label>
+            <label class="field">Process all
+              <span class="switch"><input type="checkbox" id="v_all"><span class="track"></span><span class="knob"></span></span></label>
+            <label class="field">Only unorganized
+              <span class="switch"><input type="checkbox" id="v_unsorted"><span class="track"></span><span class="knob"></span></span></label>
+            <div style="flex:1"></div>
+            <button class="btn primary" id="visionBtn">Run Vision tagging</button>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <label class="field" style="flex:1">Folder (optional)
+              <input type="text" id="v_under" placeholder="Leave empty for all vague images, or pick a folder"></label>
+            <button class="btn bordered" id="v_browse" style="align-self:flex-end">Browse…</button>
+            <label class="field">Tag folder directly
+              <span class="switch"><input type="checkbox" id="v_direct"><span class="track"></span><span class="knob"></span></span></label>
+          </div>
+          <div class="muted" style="font-size:11.5px;margin-top:10px">“Tag folder directly” walks any folder (even one that isn't indexed — e.g. <code>~/Desktop/Screenshots</code>); otherwise the folder just narrows the indexed set.</div>
+          <div class="muted" style="margin-top:12px;font-size:12px">Runs on the Neural Engine. Tags image <b>content</b> only — it never identifies the device or moves files. Results are written to a separate <code>vision_tags.sqlite3</code>.</div>
+        </div>
+        <h3 class="section">Suggested content buckets</h3>
+        <div class="listcard" style="margin-bottom:6px"><table id="v_buckets"><thead><tr><th>Bucket</th><th>Images</th></tr></thead><tbody></tbody></table></div>
+        <div class="muted" style="font-size:11.5px;margin-bottom:18px">Click a bucket to list its tagged files.</div>
+        <div class="listcard hidden" id="v_resultsCard" style="margin-bottom:18px">
+          <table id="v_resultsTbl"><thead><tr><th>Preview</th><th>File</th><th>Bucket</th><th>Detected text</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <h3 class="section">Vision output</h3>
+        <pre class="log" id="visionLog">idle — nothing tagged yet.</pre>
+      </section>
+
+      <!-- CULLING -->
+      <section class="view" id="culling">
+        <div class="note accent" style="margin-bottom:16px">
+          <b>Report only.</b> This finds visually near-identical shots (bursts, re-shoots) and suggests one to keep. MediaHub never deletes anything — use the plan to cull yourself.
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <label class="field">Similarity
+              <select id="cullThresh">
+                <option value="0.95">Very strict (0.95)</option>
+                <option value="0.9" selected>Strict (0.90)</option>
+                <option value="0.85">Loose — bursts (0.85)</option>
+              </select></label>
+            <div style="flex:1"></div>
+            <button class="btn primary" id="cullScan">Scan for near-duplicates</button>
+            <a class="btn bordered" id="cullCsv" href="/api/ai/near-duplicates.csv">Download plan (CSV)</a>
+          </div>
+          <div class="muted" id="cullInfo" style="margin-top:12px;font-size:12px"></div>
+        </div>
+        <div id="cullClusters"></div>
+
+        <h3 class="section">Misplaced screenshots &amp; documents</h3>
+        <div class="muted" style="font-size:12px;margin-bottom:8px">Screenshots/receipts (from Vision tags) found inside photo folders — candidates to move into a Documents area. Suggestion only.</div>
+        <div class="listcard" id="ssortCard"><table id="ssortTbl"><thead><tr><th>Preview</th><th>File</th><th>Bucket</th><th>Detected text</th><th></th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <!-- PEOPLE -->
+      <section class="view" id="people">
+        <div class="note accent" style="margin-bottom:16px">
+          On-device face grouping via Apple Vision. Private — nothing leaves your Mac. Report only; no files are changed.
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="row">
+            <label class="field" style="flex:1">Folder (optional)
+              <input type="text" id="pplUnder" placeholder="Leave empty for all images, or pick a folder"></label>
+            <button class="btn bordered" id="pplBrowse" style="align-self:flex-end">Browse…</button>
+            <div style="flex:1"></div>
+            <button class="btn primary" id="pplScan">Detect &amp; group faces</button>
+          </div>
+          <div class="muted" id="pplInfo" style="margin-top:12px;font-size:12px"></div>
+          <pre class="log" id="pplLog" style="height:90px;margin-top:12px;display:none"></pre>
+        </div>
+        <div id="pplGroups"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view" id="settings">
+        <div class="card" style="max-width:640px">
+          <h3 class="section" style="margin-top:0">Staging destination</h3>
+          <div class="row" style="margin-bottom:16px">
+            <div class="seg" id="destSeg">
+              <button data-mode="local" class="on">Local SSD</button>
+              <button data-mode="mounted">Mounted drive / NAS</button>
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:16px">
+            <label class="field" style="flex:1">Destination path
+              <input type="text" id="destPath" placeholder="/Users/you/Desktop/NAS_Staging"></label>
+            <button class="btn bordered" id="destBrowse" style="align-self:flex-end">Browse…</button>
+          </div>
+          <div class="row" style="margin-bottom:18px">
+            <label class="switch" for="setVerify"><input type="checkbox" id="setVerify"><span class="track"></span><span class="knob"></span></label>
+            <div><b>Verify each file with SHA-256 after copy</b><div class="muted" style="font-size:12px">Strongest integrity guarantee. Slower for large videos.</div></div>
+          </div>
+          <div class="note" id="freeNote"></div>
+          <button class="btn primary" id="saveSettings">Save settings</button>
+          <span class="muted" id="savedMsg" style="margin-left:10px"></span>
+        </div>
+
+        <div class="card" style="max-width:640px;margin-top:18px">
+          <h3 class="section" style="margin-top:0">Appearance</h3>
+          <div class="muted" style="font-size:12px">Theme — refractive glass surfaces. Changes apply instantly and are remembered.</div>
+          <div class="themecard" id="themeOpts">
+            <div class="themeopt" data-theme="auto"><div class="prev p-auto"></div>Auto (system)</div>
+            <div class="themeopt" data-theme="light"><div class="prev p-light"></div>Light</div>
+            <div class="themeopt" data-theme="dark"><div class="prev p-dark"></div>Midnight</div>
+            <div class="themeopt" data-theme="aurora"><div class="prev p-aurora"></div>Aurora glass</div>
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:16px">Accent color</div>
+          <div class="swatchrow" id="accentSwatches">
+            <div class="swatch" data-accent="blue"   style="background:linear-gradient(135deg,#0A84FF,#5E5CE6)" title="Blue"></div>
+            <div class="swatch" data-accent="purple" style="background:linear-gradient(135deg,#BF5AF2,#5E5CE6)" title="Purple"></div>
+            <div class="swatch" data-accent="pink"   style="background:linear-gradient(135deg,#FF375F,#BF5AF2)" title="Pink"></div>
+            <div class="swatch" data-accent="teal"   style="background:linear-gradient(135deg,#40C8E0,#0A84FF)" title="Teal"></div>
+            <div class="swatch" data-accent="orange" style="background:linear-gradient(135deg,#FF9F0A,#FF375F)" title="Orange"></div>
+            <div class="swatch" data-accent="green"  style="background:linear-gradient(135deg,#30D158,#0A84FF)" title="Green"></div>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:640px;margin-top:18px">
+          <h3 class="section" style="margin-top:0">Library maintenance</h3>
+          <div class="muted" style="font-size:12px">If you delete files from a drive after backing up, MediaHub can reconcile the database. <b>Only files on currently-mounted drives</b> are checked — files on unplugged drives are never touched.</div>
+          <div class="setup-status" id="reconStatus" style="margin-top:10px"></div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn bordered" id="reconScan">Scan for deleted files</button>
+            <button class="btn primary hidden" id="reconPrune">Remove from index</button>
+          </div>
+          <pre class="log" id="reconLog" style="height:80px;margin-top:12px;display:none"></pre>
+          <div class="row" style="margin-top:12px">
+            <label class="switch" for="autoRecon"><input type="checkbox" id="autoRecon"><span class="track"></span><span class="knob"></span></label>
+            <div><b>Auto-reconcile on launch</b><div class="muted" style="font-size:12px">Move files deleted from mounted drives to Trash automatically at startup. Off by default.</div></div>
+          </div>
+          <h3 class="section">Trash (recoverable)</h3>
+          <div class="muted" id="trashInfo" style="font-size:12px">Reconciled files wait here before being permanently removed.</div>
+          <div class="listcard" id="trashCard" style="margin-top:8px"><table id="trashTbl"><thead><tr><th>File</th><th>Deleted</th><th></th></tr></thead><tbody></tbody></table></div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn bordered" id="trashRefresh">Refresh trash</button>
+            <button class="btn" id="trashEmpty">Empty trash now</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:640px;margin-top:18px">
+          <h3 class="section" style="margin-top:0">Immich external library</h3>
+          <div class="muted" style="font-size:12px">Use Immich (timeline, mobile, sharing) on top of this organized archive — it reads the folder in place, read-only. MediaHub stays your organizer.</div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="immichExport">Prepare for Immich</button>
+            <span class="muted" id="immichInfo" style="font-size:12px"></span>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:640px;margin-top:18px">
+          <h3 class="section" style="margin-top:0">Storage &amp; logs</h3>
+          <div class="muted" id="pathsInfo" style="font-size:12px;line-height:1.8"></div>
+          <div class="row" style="margin:12px 0">
+            <a class="btn bordered" href="/api/logs/export" id="dlLog">Download log</a>
+            <button class="btn" id="refreshLog">Refresh log</button>
+          </div>
+          <pre class="log" id="appLog" style="height:150px">…</pre>
+          <h3 class="section">Past staging jobs (audit manifests)</h3>
+          <div class="listcard"><table id="manifestsTbl"><thead><tr><th>Job</th><th>Trip</th><th>Verified</th><th>Errors</th><th>GB</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Copy confirmation sheet (shown before a real, non-dry copy) -->
+  <div class="sheet-bg" id="copyConfirm">
+    <div class="sheet">
+      <div class="icon" style="background:rgba(10,132,255,.16);color:var(--accent)">⤓</div>
+      <h3>Start copying this trip?</h3>
+      <p>MediaHub will <b>copy</b> these files to your destination. It never moves or deletes your originals.</p>
+      <div class="drive" id="cc_trip">—</div>
+      <p class="muted">Destination: <code id="cc_dest"></code></p>
+      <div class="row" style="justify-content:center">
+        <button class="btn bordered" id="cc_cancel">Cancel</button>
+        <button class="btn primary" id="cc_confirm">Copy now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drive-swap sheet -->
+  <div class="sheet-bg" id="swapSheet">
+    <div class="sheet">
+      <div class="icon">⇄</div>
+      <h3>Insert the next drive</h3>
+      <p>This trip has files that live only on:</p>
+      <div class="drive" id="swapDrive">—</div>
+      <p id="swapRemain" class="muted"></p>
+      <div class="row" style="justify-content:center">
+        <button class="btn danger" id="swapSkip">Skip this drive</button>
+        <button class="btn primary" id="swapContinue">I’ve inserted it — Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

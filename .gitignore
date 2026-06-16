@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+# MediaHub's private on-device-deps venv (runtime only)
+pyenv/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# MediaHub build artifacts (regenerated on demand)
+vision/vision_tag
+vision/face_detect
+shell/MediaHub_master.png
+shell/icongen
+
+# Built native app bundles / archives
+*.app/
+*.zip
+
+# Runtime data & databases (live in ~/Library/Application Support/MediaHub)
+*.sqlite3
+*.sqlite3-journal
+settings.json
+stage_job.json
+trip_overrides.json
+drives.json
+logs/
+manifests/
+cache/
+
+# Editor / misc
+*.swp
+*.swo
+.idea/
+.vscode/
