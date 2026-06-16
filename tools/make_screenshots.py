@@ -60,9 +60,13 @@ DEMO_JS = r"""
 </script>
 """
 
-def build_demo():
+def build_demo(theme=None):
     html = (UI / "index.html").read_text()
-    html = html.replace("</head>", DEMO_JS + "\n</head>", 1)
+    inject = DEMO_JS
+    if theme:
+        inject += (f'\n<script>try{{localStorage.setItem("mh_theme","{theme}");'
+                   f'document.documentElement.setAttribute("data-theme","{theme}")}}catch(e){{}}</script>')
+    html = html.replace("</head>", inject + "\n</head>", 1)
     demo = UI / "_demo.html"
     demo.write_text(html)
     return demo
@@ -77,13 +81,19 @@ def shot(demo, view, name):
     return out
 
 def main():
+    # light-theme tabs
     demo = build_demo()
     try:
         for view, name in [(None, "overview"), ("stage", "stage"),
-                           ("search", "search"), ("guide", "guide")]:
+                           ("search", "search")]:
             p = shot(demo, view, name)
             print(f"{name}: {'OK' if p.exists() and p.stat().st_size>5000 else 'FAILED'} "
                   f"({p.stat().st_size if p.exists() else 0} bytes)")
+        # Aurora (dark refractive glass) hero
+        build_demo(theme="aurora")
+        p = shot(demo, None, "hero-aurora")
+        print(f"hero-aurora: {'OK' if p.exists() and p.stat().st_size>5000 else 'FAILED'} "
+              f"({p.stat().st_size if p.exists() else 0} bytes)")
     finally:
         demo.unlink(missing_ok=True)
 

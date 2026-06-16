@@ -17,11 +17,11 @@ sidebar app, light/dark/Aurora themes), optionally wrapped in a native SwiftUI w
 
 > Shown with placeholder demo data — not real library contents.
 
-![Overview](docs/screenshots/overview.png)
+![MediaHub — Aurora theme](docs/screenshots/hero-aurora.png)
 
-| Stage to Destination | Semantic Search (on-device) |
-|---|---|
-| ![Stage](docs/screenshots/stage.png) | ![Search](docs/screenshots/search.png) |
+| Overview | Stage to Destination | Semantic Search (on-device) |
+|---|---|---|
+| ![Overview](docs/screenshots/overview.png) | ![Stage](docs/screenshots/stage.png) | ![Search](docs/screenshots/search.png) |
 
 *Screenshots are generated from the real UI with fake data via
 `python3 tools/make_screenshots.py` (headless Chrome) — no personal data.*
