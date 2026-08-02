@@ -75,6 +75,7 @@ Publish the built DMG as a downloadable GitHub release (one-time `brew install g
 ```bash
 gh release create v2.0 ~/Desktop/MediaHub-Installer.dmg -t "MediaHub 2.0" -n "Drag-to-install DMG — bundles Python + prebuilt Vision/Face tools."
 ```
+Or one step (build DMG + publish): `bash tools/release.sh v2.1`
 
 **Option B — git clone (for development):**
 ```bash
