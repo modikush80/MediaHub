@@ -4,6 +4,7 @@ import threading
 from pathlib import Path
 
 APP_NAME = "MediaHub"
+VERSION = "2.1.0"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("MEDIAHUB_PORT", "8765"))
 # Where external drives mount (overridable for testing).

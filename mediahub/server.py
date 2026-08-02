@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
-from .config import APP_NAME, HOST, PORT, GB, DATA_DIR, LOGS_DIR, MANIFESTS_DIR, CACHE_DIR
+from .config import APP_NAME, VERSION, HOST, PORT, GB, DATA_DIR, LOGS_DIR, MANIFESTS_DIR, CACHE_DIR
 from .db import DB_PATH
 from .trips import q_summary, build_trips, build_sources
 from .dedupe import dedupe_plan_rows
@@ -115,6 +115,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._serve_static(path)
             if path == "/api/summary":
                 return self._send(200, q_summary())
+            if path == "/api/version":
+                return self._send(200, {"app": APP_NAME, "version": VERSION})
             if path == "/api/trips":
                 return self._send(200, build_trips())
             if path == "/api/sources":

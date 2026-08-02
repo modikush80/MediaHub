@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="/tmp/mh_build/MediaHub.app"
 STAGE="/tmp/mh_dmg_stage"
 OUT="$HOME/Desktop/MediaHub-Installer.dmg"
-VERSION="2.0"
+VERSION="$(python3 -c "import sys; sys.path.insert(0, '$ROOT'); import mediahub.config as c; print(c.VERSION)" 2>/dev/null || echo 2.1.0)"
 
 echo "▸ Cleaning build dirs"
 rm -rf /tmp/mh_build "$STAGE" "$OUT"

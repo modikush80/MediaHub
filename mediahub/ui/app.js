@@ -499,6 +499,16 @@ $("#saveSettings").onclick = async () => {
 
 /* ---------- init ---------- */
 loadSummary(); loadMounts(); loadTrips();
+(async () => {
+  try {
+    const v = await api("/api/version");
+    if (v && v.version) {
+      const el = $("#verLabel");
+      if (el) el.textContent = "v" + v.version + " · Archive Pipeline";
+      document.title = "MediaHub v" + v.version;
+    }
+  } catch (e) {}
+})();
 setInterval(loadMounts, 5000);
 
 /* ---------- on-device components (private venv installer) ---------- */
