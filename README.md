@@ -181,6 +181,20 @@ shell/           MediaHubShell.swift (SwiftUI + WKWebView) · IconGen.swift · M
 Build artifacts (compiled Swift tools, generated icon PNG, the private `pyenv/`, all
 runtime `*.sqlite3`/state) are git-ignored and regenerated on demand.
 
+## Tests
+
+Safety invariants are covered by a zero-dependency suite (no pytest or AI deps
+required, runs on synthetic fixtures — never touches a real archive):
+
+```bash
+python3 tests/run.py        # or: pytest tests/
+```
+
+Covers: classification rules, staging layout, safe de-dup (keep-one-per-hash),
+NL query parsing, and the reconcile/Trash safety guards (drive-aware deletion
+detection, refuse-to-prune when nothing resolves, reversible soft-delete →
+restore → hard-purge).
+
 ## Why not Docker?
 
 Deliberately **native**: Apple Vision/Neural Engine don't exist in Docker's Linux VM;
