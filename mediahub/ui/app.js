@@ -42,7 +42,7 @@ $$(".navitem").forEach(n => n.onclick = () => {
   if (v === "trips") loadTrips();
   if (v === "sources") loadSources();
   if (v === "dedupe") loadDedupe();
-  if (v === "settings") { loadSettings(); loadRecon(); }
+  if (v === "settings") { loadSettings(); loadRecon(); loadAbout(); }
   if (v === "stage") loadTripsForStage();
   if (v === "vision") loadVision();
   if (v === "search") { loadEmbedInfo(); loadSetup(); loadCaptionInfo(); }
@@ -502,10 +502,15 @@ loadSummary(); loadMounts(); loadTrips();
 (async () => {
   try {
     const v = await api("/api/version");
-    if (v && v.version) {
-      const el = $("#verLabel");
-      if (el) el.textContent = "v" + v.version + " · Archive Pipeline";
-      document.title = "MediaHub v" + v.version;
+    let label = v && v.version ? "v" + v.version + " · Archive Pipeline" : "Archive Pipeline";
+    if (v && v.version) document.title = "MediaHub v" + v.version;
+    const el = $("#verLabel");
+    if (el) el.textContent = label;
+    // best-effort update check (network); non-blocking
+    const u = await api("/api/update/check");
+    if (u && u.update_available && el) {
+      el.innerHTML = `v${u.current} · <span style="color:var(--orange);cursor:pointer" id="verUpd">update → ${u.latest}</span>`;
+      const up = $("#verUpd"); if (up) up.onclick = () => window.open(u.url, "_blank");
     }
   } catch (e) {}
 })();
@@ -881,5 +886,26 @@ if ($("#destBrowse")) $("#destBrowse").onclick = async () => {
   if (p && $("#destSeg")) {
     destMode = p.startsWith("/Volumes/") ? "mounted" : "local";
     $("#destSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.mode === destMode));
+  }
+};
+
+/* ---------- about & check for updates ---------- */
+async function loadAbout() {
+  const v = await api("/api/version");
+  const el = $("#aboutInfo");
+  if (el && v && v.version) el.innerHTML = `<b>MediaHub</b> v${v.version}`;
+}
+if ($("#checkUpdateBtn")) $("#checkUpdateBtn").onclick = async () => {
+  const el = $("#aboutInfo"); const btn = $("#checkUpdateBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Checking…"; }
+  const u = await api("/api/update/check");
+  if (btn) { btn.disabled = false; btn.textContent = "Check for updates"; }
+  if (!el) return;
+  if (u.error) {
+    el.innerHTML = `<b>MediaHub</b> v${u.current} · <span class="muted">couldn't check (offline?)</span>`;
+  } else if (u.update_available) {
+    el.innerHTML = `<b>MediaHub</b> v${u.current} · <span style="color:var(--orange)">update available: ${u.latest}</span> — <a href="${u.url}" target="_blank">get it</a>`;
+  } else {
+    el.innerHTML = `<b>MediaHub</b> v${u.current} · <span class="green">up to date ✓</span>`;
   }
 };

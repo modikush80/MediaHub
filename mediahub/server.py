@@ -117,6 +117,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, q_summary())
             if path == "/api/version":
                 return self._send(200, {"app": APP_NAME, "version": VERSION})
+            if path == "/api/update/check":
+                from . import updates
+                return self._send(200, updates.check_update())
             if path == "/api/trips":
                 return self._send(200, build_trips())
             if path == "/api/sources":
