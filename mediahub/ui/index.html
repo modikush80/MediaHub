@@ -191,6 +191,22 @@
         </div>
 
         <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">Consolidate to one copy (verified move)</h3>
+          <p class="muted" style="line-height:1.6;margin:0 0 8px">When the same shots live on several drives, <b>Consolidate</b> keeps one verified copy at your destination and removes the duplicate sources to reclaim space. It's the only mode that touches sources — so it's deliberately careful.</p>
+          <ol style="line-height:1.9;padding-left:20px;margin:0 0 8px">
+            <li>Set a destination in <b><a class="gotolink" data-goto="settings">Settings</a></b> and connect your source drive(s).</li>
+            <li>Open <b><a class="gotolink" data-goto="stage">Stage to Destination</a></b>, pick a trip, and choose the <b>Move ⚠︎</b> mode.</li>
+            <li>Click <b>Start staging</b> → a sheet asks you to type <b>MOVE</b> to confirm.</li>
+            <li>For each file: MediaHub copies it, <b>hash-verifies</b> the destination, and only <b>then</b> sends the duplicate source copies to the <b>Trash</b>.</li>
+            <li>Review the <b>Consolidation log</b> (bottom of Stage) — every removal is recorded (source → surviving copy). Download it as CSV anytime.</li>
+            <li>Empty the macOS Trash when you're satisfied, to actually free the space.</li>
+          </ol>
+          <div class="note">
+            <b>Safety.</b> A source is removed <b>only after</b> its destination copy passes a SHA-256 check. Files on <b>unplugged</b> drives are never touched. Removals go to the <b>Trash</b> (recoverable), not a permanent delete. Move always hash-verifies, and copy stays the default. If you just want a safe backup without reclaiming space, use <b>Copy</b> instead.
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
           <h3 class="section" style="margin-top:0">Deleting files &amp; keeping the database honest</h3>
           <p class="muted" style="line-height:1.6;margin:0 0 8px">
             After you back up and delete files from a drive, reconcile the database in
