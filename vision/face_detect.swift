@@ -23,7 +23,7 @@ func featurePrint(_ cg: CGImage) -> [Float]? {
     let count = obs.elementCount
     var floats = [Float](repeating: 0, count: count)
     let data = obs.data
-    floats.withUnsafeMutableBytes { buf in data.copyBytes(to: buf) }
+    _ = floats.withUnsafeMutableBytes { buf in data.copyBytes(to: buf) }
     // L2 normalize for cosine clustering
     let norm = sqrt(floats.reduce(0) { $0 + $1 * $1 })
     if norm > 0 { for i in 0..<floats.count { floats[i] /= norm } }
@@ -34,7 +34,7 @@ func detectFaces(_ cg: CGImage) -> [VNFaceObservation] {
     let req = VNDetectFaceRectanglesRequest()
     let handler = VNImageRequestHandler(cgImage: cg, options: [:])
     do { try handler.perform([req]) } catch { return [] }
-    return (req.results as? [VNFaceObservation]) ?? []
+    return req.results ?? []
 }
 
 func cropFace(_ cg: CGImage, _ bb: CGRect) -> CGImage? {
