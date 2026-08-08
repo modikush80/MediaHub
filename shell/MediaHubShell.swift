@@ -40,8 +40,10 @@ final class Backend: ObservableObject {
     }
 
     private func isMediaHub(port: Int) -> Bool {
-        guard let u = URL(string: "http://127.0.0.1:\(port)/api/summary") else { return false }
-        var req = URLRequest(url: u); req.timeoutInterval = 0.8
+        // Probe a LIGHTWEIGHT endpoint — /api/summary triggers the heavy library
+        // read and can block ~30s on a cold start, which would make detection fail.
+        guard let u = URL(string: "http://127.0.0.1:\(port)/api/version") else { return false }
+        var req = URLRequest(url: u); req.timeoutInterval = 1.5
         let sem = DispatchSemaphore(value: 0); var ok = false
         URLSession.shared.dataTask(with: req) { _, resp, _ in
             if let h = resp as? HTTPURLResponse,
@@ -101,7 +103,7 @@ final class Backend: ObservableObject {
     /// stdout "running at" line is missed.
     private func pollForServer() {
         DispatchQueue.global().async {
-            for _ in 0..<40 {
+            for _ in 0..<80 {
                 if self.url != nil { return }
                 for p in 8765...8775 where self.isMediaHub(port: p) {
                     self.publish(URL(string: "http://127.0.0.1:\(p)/"), "Running")
