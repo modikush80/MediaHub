@@ -207,6 +207,26 @@
         </div>
 
         <div class="card" style="margin-bottom:16px">
+          <h3 class="section" style="margin-top:0">Search &amp; Smart Culling — step by step</h3>
+          <p class="muted" style="line-height:1.6;margin:0 0 8px">All on-device. First enable the engines once in <b><a class="gotolink" data-goto="search">Semantic Search</a> → On-device components</b> (numpy / MLX CLIP / MLX-VLM) — they install into MediaHub's own private environment; your system Python is untouched.</p>
+          <p style="line-height:1.7;margin:0 0 4px"><b>Find photos by content (Semantic Search)</b></p>
+          <ol style="line-height:1.85;padding-left:20px;margin:0 0 10px">
+            <li>Open <b><a class="gotolink" data-goto="search">Semantic Search</a></b> → <b>Build / update embeddings</b> (scope to a folder/drive if you like).</li>
+            <li>Search naturally — “drone sunset 2024”, “people on a beach”. It auto-applies device/year filters and (with MLX) matches actual image content, not filenames.</li>
+            <li>Results show thumbnails with <b>Open</b> and <b>Reveal in Finder</b>. Build <b>AI captions</b> to also search by description.</li>
+          </ol>
+          <p style="line-height:1.7;margin:0 0 4px"><b>Trim duplicates &amp; bursts (Smart Culling)</b></p>
+          <ol style="line-height:1.85;padding-left:20px;margin:0 0 8px">
+            <li>Open <b><a class="gotolink" data-goto="culling">Smart Culling</a></b> and pick a similarity level (Strict / Loose for bursts).</li>
+            <li><b>Scan for near-duplicates</b> — it groups visually near-identical shots per trip and marks a suggested <b>best-shot to keep</b>.</li>
+            <li>Review each group (thumbnails + Open/Reveal), then <b>Download plan (CSV)</b> and delete the extras yourself.</li>
+          </ol>
+          <div class="note">
+            Culling is <b>report-only</b> — it never deletes anything; it just recommends which copies you could remove. Search/OCR/faces all run locally and write to separate side databases, never your inventory. Screenshots/receipts are best found via <b><a class="gotolink" data-goto="vision">Vision &amp; OCR</a></b> (text search), and grouped faces live in <b><a class="gotolink" data-goto="people">People</a></b>.
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
           <h3 class="section" style="margin-top:0">Deleting files &amp; keeping the database honest</h3>
           <p class="muted" style="line-height:1.6;margin:0 0 8px">
             After you back up and delete files from a drive, reconcile the database in
