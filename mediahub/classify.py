@@ -197,5 +197,28 @@ def classify(top_folder: str):
     return cleaned.title() if cleaned else "(root)", "trips"
 
 
+def smart_trip(f):
+    """(label, category) for a single file. Named trips keep their folder-based
+    label; camera-dumps / unsorted are refined by GPS place + capture YEAR so an
+    unlabeled multi-year, multi-place card dump self-sorts into e.g.
+    'Reykjavík 2024' / 'Camera Dump 2023' instead of one undifferentiated pile."""
+    label, cat = classify(f.get("top_folder", ""))
+    if cat not in ("camera-dumps", "unsorted"):
+        return label, cat
+    ym = file_year_month(f)
+    year = ym[:4] if ym else ""
+    place = None
+    lat, lon = f.get("gps_latitude"), f.get("gps_longitude")
+    if lat is not None and lon is not None:
+        try:
+            from . import geo
+            place = geo.place_for(lat, lon)
+        except Exception:
+            place = None
+    base = place or ("Camera Dump" if cat == "camera-dumps" else "Unsorted")
+    label = f"{base} {year}".strip() if year else base
+    return label, cat
+
+
 # ----------------------------------------------------------------------------
 # Database access

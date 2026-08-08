@@ -4,7 +4,7 @@ import threading
 from pathlib import Path
 
 APP_NAME = "MediaHub"
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 GITHUB_REPO = os.environ.get("MEDIAHUB_REPO", "modikush80/MediaHub")
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("MEDIAHUB_PORT", "8765"))

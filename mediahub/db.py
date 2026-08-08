@@ -91,6 +91,7 @@ def all_files():
                               OR m.raw_metadata_json LIKE '%Final Cut%'
                             THEN 1 ELSE 0 END AS edited_sw,
                        m.image_width AS width, m.image_height AS height,
+                       m.gps_latitude AS gps_latitude, m.gps_longitude AS gps_longitude,
                        CASE WHEN m.raw_metadata_json LIKE '%"Orientation": 5%'
                               OR m.raw_metadata_json LIKE '%"Orientation": 6%'
                               OR m.raw_metadata_json LIKE '%"Orientation": 7%'

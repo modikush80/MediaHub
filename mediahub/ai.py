@@ -23,7 +23,7 @@ def _rich_meta():
     """id -> {file_name, full_path, trip, device, size, pixels, ext}"""
     m = {}
     for f in all_files():
-        trip = classify(f.get("top_folder", ""))[0]
+        trip = smart_trip(f)[0]
         w = f.get("image_width") or f.get("width") or 0
         h = f.get("image_height") or f.get("height") or 0
         try:

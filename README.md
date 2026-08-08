@@ -37,6 +37,7 @@ sidebar app, light/dark/Aurora themes), optionally wrapped in a native SwiftUI w
   logging every removal to a **Consolidation ledger** (`moves.sqlite3`). Gated behind a
   typed `MOVE` confirmation; always hash-verifies. Devices recognized include Sony,
   iPhone, GoPro, Insta360, DJI Drone, and DJI **Osmo Pocket**.
+- **Camera dumps organize themselves** — folders with no trip name are split by each file's capture **year** and, when GPS is present, an **offline reverse-geocoded place** (e.g. `Reykjavík 2024`), no network.
 - De-dup and culling are **reports** you act on yourself — the app never deletes media.
 - The inventory DB is read-only during normal use; the only writes are explicit
   **ingest** and **reconcile**, and reconcile uses a recoverable **Trash** (see below).

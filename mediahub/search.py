@@ -17,7 +17,7 @@ from pathlib import Path
 
 from .config import DATA_DIR
 from .db import DB_PATH, all_files
-from .classify import classify, bucket_for
+from .classify import classify, smart_trip, bucket_for
 
 EMB_DB = DATA_DIR / "embeddings.sqlite3"
 PHOTO_EXTS = (".jpg", ".jpeg", ".png", ".heic", ".tif", ".tiff")
@@ -301,7 +301,7 @@ def _encode_query(text, backend):
 def _meta_map():
     m = {}
     for f in all_files():
-        trip = classify(f["top_folder"])[0]
+        trip = smart_trip(f)[0]
         m[f["id"]] = {"file_name": f["file_name"], "device": f.get("device"),
                       "trip": trip, "full_path": f["full_path"],
                       "orientation": f.get("orientation")}

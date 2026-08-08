@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .config import GB, DATA_DIR, MANIFESTS_DIR
 from .db import all_files
-from .classify import bucket_for, classify_stage, slugify, classify
+from .classify import bucket_for, classify_stage, slugify, classify, smart_trip
 from .settings import dest_base, load_overrides
 from .trips import build_trips
 from . import drives
@@ -105,7 +105,7 @@ def plan_stage(trip_label, dry_run, verify_hash, mode="copy"):
     for f in files:
         key = f"{f['device_name']}::{f['top_folder']}"
         label = (overrides.get(key, {}).get("trip")
-                 or classify(f["top_folder"])[0])
+                 or smart_trip(f)[0])
         if label != trip_label:
             continue
         h = f["sha256"] or f"__nh{f['id']}"
@@ -666,7 +666,7 @@ def staging_targets(trip_label: str):
         if key in overrides and overrides[key].get("trip"):
             label = overrides[key]["trip"]
         else:
-            label = classify(f["top_folder"])[0]
+            label = smart_trip(f)[0]
         if label != trip_label:
             continue
         h = f["sha256"] or f"__nohash__{f['id']}"

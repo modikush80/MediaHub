@@ -3,7 +3,7 @@ from collections import Counter
 
 from .config import GB, data_epoch
 from .db import connect, all_files, DB_PATH
-from .classify import classify, file_year_month, slugify, TRIP_DATE
+from .classify import classify, smart_trip, file_year_month, slugify, TRIP_DATE
 from .settings import load_overrides
 
 
@@ -84,10 +84,11 @@ def build_trips():
     for f in files:
         key = f"{f['device_name']}::{f['top_folder']}"
         if key in overrides:
-            label = overrides[key].get("trip") or classify(f["top_folder"])[0]
-            cat = overrides[key].get("category") or classify(f["top_folder"])[1]
+            slabel, scat = smart_trip(f)
+            label = overrides[key].get("trip") or slabel
+            cat = overrides[key].get("category") or scat
         else:
-            label, cat = classify(f["top_folder"])
+            label, cat = smart_trip(f)
         t = trips.setdefault(label, {
             "trip": label, "category": cat,
             "files": 0, "bytes": 0,
