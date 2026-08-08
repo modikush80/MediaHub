@@ -1,5 +1,11 @@
 # MediaHub
 
+### ⬇️ [Download for macOS (.dmg)](https://github.com/modikush80/MediaHub/releases/latest/download/MediaHub-Installer.dmg)
+
+Open the `.dmg` → drag **MediaHub.app** to Applications → first launch **right-click → Open**.
+Self-contained (bundled Python + Apple Vision/Face tools) — nothing else to install.
+Or grab any version from the [Releases page](https://github.com/modikush80/MediaHub/releases).
+
 A portable, **local-first macOS app** that turns a multi-terabyte photo/video archive
 scattered across external SSDs into a clean, de-duplicated, searchable library on your
 own SSD or NAS — safely, one trip at a time. It's the whole pipeline:
