@@ -1,10 +1,11 @@
 """Read-only inventory DB access + the joined/derived all_files() cache."""
 import os
+import pickle
 import sqlite3
 import threading
 from pathlib import Path
 
-from .config import DATA_DIR, bump_epoch
+from .config import DATA_DIR, CACHE_DIR, bump_epoch
 from .classify import classify_device, classify_stage, classify_orientation
 
 
@@ -50,17 +51,40 @@ def top_folder_expr() -> str:
 
 _FILES_CACHE = None
 _FILES_LOCK = threading.Lock()
+_CACHE_FILE = CACHE_DIR / "all_files.cache.pkl"
+
+
+def _inv_sig():
+    """Fingerprint of the inventory DB — changes on any ingest/reconcile write."""
+    try:
+        st = DB_PATH.stat()
+        return f"{st.st_mtime_ns}:{st.st_size}"
+    except OSError:
+        return "0:0"
 
 
 def all_files():
     """All files joined with capture metadata, with derived device/stage.
 
-    Cached for the process lifetime (the inventory DB is read-only/static).
+    Cached for the process lifetime AND persisted to disk (keyed to the inventory
+    fingerprint), so a fresh launch loads in ~1s instead of re-running the heavy
+    join+scan (~25s cold) every time. Rebuilt automatically when the DB changes.
     """
     global _FILES_CACHE
     with _FILES_LOCK:
         if _FILES_CACHE is not None:
             return _FILES_CACHE
+        # Fast path: load the persisted cache if it matches the current inventory.
+        sig = _inv_sig()
+        try:
+            if _CACHE_FILE.exists():
+                with open(_CACHE_FILE, "rb") as fh:
+                    blob = pickle.load(fh)
+                if blob.get("sig") == sig and isinstance(blob.get("rows"), list):
+                    _FILES_CACHE = blob["rows"]
+                    return _FILES_CACHE
+        except Exception:
+            pass                                   # corrupt/old cache -> rebuild below
         conn = connect()
         try:
             c = conn.cursor()
@@ -119,15 +143,26 @@ def all_files():
                     d.get("width"), d.get("height"), bool(d.get("rotated")))
                 out.append(d)
             _FILES_CACHE = out
+            try:
+                CACHE_DIR.mkdir(parents=True, exist_ok=True)
+                tmp = _CACHE_FILE.with_suffix(".tmp")
+                with open(tmp, "wb") as fh:
+                    pickle.dump({"sig": sig, "rows": out}, fh, protocol=pickle.HIGHEST_PROTOCOL)
+                os.replace(tmp, _CACHE_FILE)       # atomic
+            except Exception:
+                pass                               # cache is an optimization, never fatal
             return out
         finally:
             conn.close()
 
 
-
 def invalidate_files_cache():
-    """Clear the all_files cache (call after ingest mutates the DB)."""
+    """Clear the all_files cache (call after ingest/reconcile mutates the DB)."""
     global _FILES_CACHE
     with _FILES_LOCK:
         _FILES_CACHE = None
+        try:
+            _CACHE_FILE.unlink(missing_ok=True)    # force a rebuild on next read
+        except Exception:
+            pass
     bump_epoch()
