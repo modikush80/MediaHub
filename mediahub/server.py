@@ -42,6 +42,10 @@ _CTYPES = {
     ".webmanifest": "application/manifest+json", ".woff2": "font/woff2",
 }
 
+# Set True once the heavy caches are warmed (see main()._warm). Lets the UI show
+# a "warming up" splash instead of looking frozen during the first cold read.
+READY = False
+
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):  # quiet
@@ -118,6 +122,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, q_summary())
             if path == "/api/version":
                 return self._send(200, {"app": APP_NAME, "version": VERSION})
+            if path == "/api/ready":
+                return self._send(200, {"ready": READY})
             if path == "/api/update/check":
                 from . import updates
                 return self._send(200, updates.check_update())
@@ -479,10 +485,13 @@ def main():
 
     # Warm the heavy caches in the background so the first tab render is instant.
     def _warm():
+        global READY
         try:
             q_summary(); build_trips(); build_sources()
         except Exception:
             pass
+        finally:
+            READY = True                           # caches warm -> UI can drop the splash
         # Reconcile: purge anything past its recovery window, then surface current
         # deletions. Auto-prune (soft-delete) only when the user opted in.
         try:

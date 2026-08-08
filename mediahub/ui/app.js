@@ -529,7 +529,18 @@ $("#saveSettings").onclick = async () => {
 };
 
 /* ---------- init ---------- */
-loadSummary(); loadMounts(); loadTrips();
+async function boot() {
+  const splash = document.getElementById("splash");
+  // Wait for the backend to warm its caches (fast /api/ready poll) so the app
+  // never shows a frozen shell during the first cold read of a large library.
+  for (let i = 0; i < 300; i++) {
+    try { const r = await api("/api/ready"); if (r && r.ready) break; } catch (e) {}
+    await new Promise(res => setTimeout(res, 600));
+  }
+  if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 500); }
+  loadSummary(); loadMounts(); loadTrips();
+}
+boot();
 (async () => {
   try {
     const v = await api("/api/version");

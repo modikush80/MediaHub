@@ -204,6 +204,20 @@ html[data-accent="green"]{--accent:#30D158;--accent-2:#0A84FF;--accent-press:#4c
 .navitem.active .navbadge{background:rgba(255,255,255,.9);color:var(--accent)}
 .gotolink{color:var(--accent);cursor:pointer;text-decoration:none;border-bottom:1px dotted var(--accent)}
 .gotolink:hover{opacity:.8}
+
+/* Warming-up splash (shown until /api/ready) */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);
+  transition:opacity .4s ease}
+#splash.hidden{opacity:0;pointer-events:none}
+.splash-inner{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:24px}
+.splash-logo{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 10px 30px rgba(10,132,255,.4)}
+.spinner{width:30px;height:30px;border-radius:50%;border:3px solid var(--fill-2);border-top-color:var(--accent);
+  animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.splash-title{font-size:16px;font-weight:650;color:var(--text)}
+.splash-sub{font-size:12.5px;color:var(--text-2);max-width:320px}
 .sidebar .spacer{flex:1}
 .mountbox{font-size:11px;color:var(--text-2);padding:10px;border-radius:var(--radius-sm);
   background:var(--fill);margin-top:8px}
