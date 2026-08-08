@@ -552,7 +552,7 @@ boot();
     const u = await api("/api/update/check");
     if (u && u.update_available && el) {
       el.innerHTML = `v${u.current} · <span style="color:var(--orange);cursor:pointer" id="verUpd">update → ${u.latest}</span>`;
-      const up = $("#verUpd"); if (up) up.onclick = () => window.open(u.url, "_blank");
+      const up = $("#verUpd"); if (up) up.onclick = () => window.open(u.download_url || u.url, "_blank");
     }
   } catch (e) {}
 })();
@@ -946,7 +946,8 @@ if ($("#checkUpdateBtn")) $("#checkUpdateBtn").onclick = async () => {
   if (u.error) {
     el.innerHTML = `<b>MediaHub</b> v${u.current} · <span class="muted">couldn't check (offline?)</span>`;
   } else if (u.update_available) {
-    el.innerHTML = `<b>MediaHub</b> v${u.current} · <span style="color:var(--orange)">update available: ${u.latest}</span> — <a href="${u.url}" target="_blank">get it</a>`;
+    el.innerHTML = `<b>MediaHub</b> v${u.current} · <span style="color:var(--orange)">update available: ${u.latest}</span> — `
+      + `<a href="${u.download_url || u.url}" target="_blank">download .dmg</a>, then drag it into Applications to replace this version.`;
   } else {
     el.innerHTML = `<b>MediaHub</b> v${u.current} · <span class="green">up to date ✓</span>`;
   }

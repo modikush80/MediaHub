@@ -16,7 +16,9 @@ def check_update(timeout: float = 4.0) -> dict:
     """Return {current, latest, update_available, url, error?}. Drafts/prereleases
     are ignored (the /releases/latest endpoint only returns published releases)."""
     result = {"current": VERSION, "latest": None, "update_available": False,
-              "url": f"https://github.com/{GITHUB_REPO}/releases", "error": None}
+              "url": f"https://github.com/{GITHUB_REPO}/releases",
+              "download_url": f"https://github.com/{GITHUB_REPO}/releases/latest/download/MediaHub-Installer.dmg",
+              "error": None}
     url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
     try:
         req = urllib.request.Request(url, headers={
