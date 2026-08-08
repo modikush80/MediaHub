@@ -73,17 +73,25 @@ def _haversine(lat1, lon1, lat2, lon2):
     return 2 * r * math.asin(min(1.0, math.sqrt(a)))
 
 
+_CACHE = {}
+
+
 def place_for(lat, lon):
-    """Nearest gazetteer place name within MAX_KM, else None."""
+    """Nearest gazetteer place name within MAX_KM, else None. Memoized by a
+    coarse coordinate bucket so 15k dump files collapse to a handful of lookups."""
     try:
         lat = float(lat); lon = float(lon)
     except (TypeError, ValueError):
         return None
     if lat == 0 and lon == 0:
         return None                      # null island -> treat as no fix
+    key = (round(lat, 2), round(lon, 2))
+    if key in _CACHE:
+        return _CACHE[key]
     best, best_d = None, MAX_KM
     for name, plat, plon in GAZETTEER:
         d = _haversine(lat, lon, plat, plon)
         if d < best_d:
             best, best_d = name, d
+    _CACHE[key] = best
     return best
