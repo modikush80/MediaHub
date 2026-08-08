@@ -173,12 +173,21 @@
         </div>
 
         <div class="card" style="margin-bottom:16px">
-          <h3 class="section" style="margin-top:0">New trips later</h3>
-          <p class="muted" style="line-height:1.6;margin:0">
-            Back from a trip? <b>New Trip Ingest → Browse → pick the folder → Scan &amp; ingest</b>. It folds
-            the new media into your inventory; then stage it like any other trip. Adding new data never
-            disturbs what's already organized. (Staged trips are also auto-embedded for search.)
-          </p>
+          <h3 class="section" style="margin-top:0">Ingesting a new trip — step by step</h3>
+          <p class="muted" style="line-height:1.6;margin:0 0 8px">Back from a trip? Fold the new media into your library in a few clicks. It's additive and safe — ingesting only <b>reads</b> your files and adds rows to the inventory; it never moves or changes originals.</p>
+          <ol style="line-height:1.9;padding-left:20px;margin:0 0 8px">
+            <li>Offload your card/drive to a folder however you normally do.</li>
+            <li>Open <b><a class="gotolink" data-goto="ingest">New Trip Ingest</a></b>.</li>
+            <li><b>Browse…</b> and pick the offloaded folder (or the whole drive).</li>
+            <li><b>Scan &amp; ingest</b> — it walks the folder, hashes files, reads EXIF (camera make/model, date, GPS) and folds them into the same inventory. Watch the live progress log.</li>
+            <li>When it finishes, the new media is instantly everywhere: <b><a class="gotolink" data-goto="overview">Overview</a></b> counts update and it appears in <b><a class="gotolink" data-goto="trips">Trips</a></b>.</li>
+            <li>Then organize/back it up: <b><a class="gotolink" data-goto="stage">Stage to Destination</a></b> → pick the trip → Preview → Dry run → Copy (or Move to consolidate).</li>
+          </ol>
+          <div class="note">
+            <b>Tips.</b> Install <code>exiftool</code> (<code>brew install exiftool</code>) for richer metadata — without it, files still index and device is inferred from name/extension.
+            A folder with no recognizable trip name <b>auto-organizes by capture year + GPS place</b> (e.g. <code>Reykjavík 2024</code>).
+            After a big ingest the first view may briefly show the <b>Warming up…</b> splash while the library re-reads.
+          </div>
         </div>
 
         <div class="card" style="margin-bottom:16px">
