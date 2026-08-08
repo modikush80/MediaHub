@@ -15,6 +15,7 @@ from .settings import dest_base, load_overrides
 from .trips import build_trips
 from . import drives
 from . import applog
+from . import moves
 
 # Regenerable / disposable derivatives: dropped during staging.
 PROXY_SKIP_EXT = {".thm", ".lrf", ".lrv", ".bin", ".int", ".bdm"}
@@ -93,9 +94,11 @@ def _sha256_file(path):
     return h.hexdigest()
 
 
-def plan_stage(trip_label, dry_run, verify_hash):
+def plan_stage(trip_label, dry_run, verify_hash, mode="copy"):
     """Build a persistent job: one item per unique hash, with all source
-    candidates across drives and a fixed destination path."""
+    candidates across drives and a fixed destination path.
+    mode: 'copy' (default, never touches sources) or 'move' (consolidate — after
+    a destination copy is hash-verified, source copies are removed to Trash)."""
     overrides = load_overrides()
     files = all_files()
     groups = {}
@@ -149,7 +152,8 @@ def plan_stage(trip_label, dry_run, verify_hash):
         })
     return {
         "trip": trip_label, "dest_root": str(dest_root),
-        "verify_hash": bool(verify_hash), "dry_run": bool(dry_run),
+        "verify_hash": bool(verify_hash) or mode == "move",   # moves always hash-verify
+        "dry_run": bool(dry_run), "mode": mode,
         "status": "running", "awaiting_drive": None,
         "message": "Planning…", "current": "",
         "started_at": time.time(), "updated_at": time.time(),
@@ -326,6 +330,31 @@ def _finish_message(job):
             f"Skipped {sk}, errors {er}.")
 
 
+def _consolidate_sources(job, it, dest, mount_map):
+    """MOVE mode: the destination copy is verified — now remove each *mounted*
+    source copy to the Trash (recoverable) and log it to the moves ledger.
+    Never touches unmounted drives or the destination file itself."""
+    removed = 0
+    try:
+        dest_real = os.path.realpath(dest)
+        for c in it["candidates"]:
+            sp = drives.resolve_candidate_path(c["device"], c.get("root", ""),
+                                               c["path"], mount_map)
+            if not sp or not os.path.exists(sp):
+                continue                      # unmounted / already gone -> leave it
+            if os.path.realpath(sp) == dest_real:
+                continue                      # never trash the surviving copy
+            if moves.trash_source(sp):
+                moves.record(it["sha256"], sp, c.get("device"), str(dest),
+                             it["size"], verified_hash=True, action="trashed")
+                removed += 1
+    except Exception as e:                    # noqa: BLE001 — never fail the stage
+        applog.log(f"CONSOLIDATE warn on {it.get('dest_name')}: {e}")
+    it["consolidated"] = True
+    it["removed_sources"] = removed
+    job["moved_files"] = job.get("moved_files", 0) + removed
+
+
 def _stage_pass():
     """One pass: copy every pending item that has a mounted source candidate.
     Then either finish or request the drive that unblocks the most files."""
@@ -377,6 +406,9 @@ def _stage_pass():
                 it["verify_status"] = it.get("verify_status") or (
                     "sha256-verified (resumed)" if do_hash else "size-verified (resumed)")
                 it["copied_at"] = it.get("copied_at") or time.strftime("%Y-%m-%dT%H:%M:%S")
+                if job.get("mode") == "move" and not it.get("consolidated") \
+                        and str(it.get("verify_status", "")).startswith("sha256"):
+                    _consolidate_sources(job, it, dest, mount_map)
                 _save_job(job)
                 continue
 
@@ -417,6 +449,12 @@ def _stage_pass():
                     partial.unlink()             # never leave a partial behind
             except OSError:
                 pass
+        # MOVE (consolidate): only after the destination is SHA-verified do we
+        # remove the source copies. Never for size-only or unverified items.
+        if job.get("mode") == "move" and not it.get("consolidated") \
+                and it["state"] == "verified" \
+                and str(it.get("verify_status", "")).startswith("sha256"):
+            _consolidate_sources(job, it, dest, mount_map)
         _save_job(job)
 
     pending = [it for it in job["items"] if it["state"] == "pending"]
@@ -449,15 +487,15 @@ def _stage_pass():
             applog.log(f"STAGE done: {_finish_message(job)}")
 
 
-def start_stage(trip, dry_run, verify_hash):
+def start_stage(trip, dry_run, verify_hash, mode="copy"):
     global STAGE_THREAD
     with STAGE_LOCK:
         if STAGE_THREAD and STAGE_THREAD.is_alive():
             return False
-        job = plan_stage(trip, dry_run, verify_hash)
+        job = plan_stage(trip, dry_run, verify_hash, mode)
         _save_job(job)
-        applog.log(f"STAGE start: trip='{trip}' dry_run={dry_run} verify={verify_hash} "
-                   f"items={len(job['items'])} dest={job['dest_root']}")
+        applog.log(f"STAGE start: trip='{trip}' mode={mode} dry_run={dry_run} "
+                   f"verify={job['verify_hash']} items={len(job['items'])} dest={job['dest_root']}")
         STAGE_THREAD = threading.Thread(target=_stage_pass, daemon=True)
         STAGE_THREAD.start()
     return True

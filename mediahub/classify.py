@@ -31,9 +31,15 @@ def classify_device(make, model, ext, fname, has_altitude=False) -> str:
     e = (ext or "").lower()
     fn = (fname or "").lower()
 
-    # Insta360 (rarely writes standard EXIF make)
-    if e in (".insv", ".insp"):
+    # Insta360 (make is often "Arashi Vision"; sometimes no standard EXIF make)
+    if e in (".insv", ".insp") or "insta360" in mk or "arashi" in mk \
+            or "insta360" in md or "one x" in md or "one r" in md \
+            or "one rs" in md or md in ("x3", "x4", "x5"):
         return "Insta360"
+    # DJI Osmo Pocket (handheld gimbal camera — NOT a drone). Detected by model,
+    # so it never gets lumped into Drone below.
+    if "osmo" in md or "pocket" in md or "osmo" in mk:
+        return "Osmo Pocket"
     # GoPro
     if "gopro" in mk or md.startswith("hero") or "hero" in md or e == ".gpr" \
             or _GOPRO_FN.match(fn):

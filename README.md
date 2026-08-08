@@ -28,9 +28,15 @@ sidebar app, light/dark/Aurora themes), optionally wrapped in a native SwiftUI w
 
 ## Safety first
 
-- Your original photos/videos are **never modified, moved, renamed, or deleted**.
-- Staging only ever **copies** (`shutil.copy2`) to your chosen destination, with a
-  crash-safe `.partial → verify → atomic rename` flow.
+- Your original photos/videos are **never modified, moved, renamed, or deleted** in the
+  default (copy) flow.
+- Staging **copies** (`shutil.copy2`) with a crash-safe `.partial → verify → atomic rename`.
+- **Consolidate (verified move)** — an opt-in mode that reclaims space by removing
+  duplicate source copies, but only **after** the destination is **hash-verified**, only
+  from **currently-mounted** drives, sending sources to the **Trash** (recoverable), and
+  logging every removal to a **Consolidation ledger** (`moves.sqlite3`). Gated behind a
+  typed `MOVE` confirmation; always hash-verifies. Devices recognized include Sony,
+  iPhone, GoPro, Insta360, DJI Drone, and DJI **Osmo Pocket**.
 - De-dup and culling are **reports** you act on yourself — the app never deletes media.
 - The inventory DB is read-only during normal use; the only writes are explicit
   **ingest** and **reconcile**, and reconcile uses a recoverable **Trash** (see below).

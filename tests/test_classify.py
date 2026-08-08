@@ -25,6 +25,20 @@ def test_device_by_altitude_means_drone():
     assert classify_device("", "", ".dng", "x.dng", has_altitude=True) == "Drone"
 
 
+def test_osmo_pocket_is_not_drone():
+    # Osmo Pocket handheld: DJI make but model says Osmo -> its own device
+    assert classify_device("DJI", "Osmo Pocket 3", ".mp4", "DJI_0007.mp4") == "Osmo Pocket"
+    assert classify_device("", "OSMO POCKET", ".jpg", "x.jpg") == "Osmo Pocket"
+    # a real DJI drone (altitude / FC model) still resolves to Drone
+    assert classify_device("DJI", "FC7303", ".dng", "DJI_0001.dng", has_altitude=True) == "Drone"
+
+
+def test_insta360_by_make_and_model():
+    assert classify_device("Arashi Vision", "Insta360 X4", ".mp4", "x.mp4") == "Insta360"
+    assert classify_device("Insta360", "One RS", ".jpg", "x.jpg") == "Insta360"
+    assert classify_device("", "", ".insv", "VID.insv") == "Insta360"
+
+
 def test_stage_detection():
     assert classify_stage(".xmp", "x.xmp") == "sidecar"
     assert classify_stage(".jpg", "sunset-edit.jpg") == "edited"

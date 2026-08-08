@@ -32,6 +32,7 @@ from . import ai
 from . import captions
 from . import faces
 from . import reindex
+from . import moves
 
 UI_DIR = Path(__file__).resolve().parent / "ui"
 _CTYPES = {
@@ -248,6 +249,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, reindex.reconcile_status())
             if path == "/api/reindex/trash":
                 return self._send(200, reindex.trash_list())
+            if path == "/api/moves":
+                return self._send(200, moves.list_moves())
+            if path == "/api/moves.csv":
+                data = moves.moves_csv().encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv")
+                self.send_header("Content-Disposition", 'attachment; filename="mediahub_moves.csv"')
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+                return
             if path == "/api/ai/caption/search":
                 qs = parse_qs(u.query)
                 return self._send(200, captions.caption_search(
@@ -305,11 +317,17 @@ class Handler(BaseHTTPRequestHandler):
                 trip = payload.get("trip")
                 dry = bool(payload.get("dry_run", False))
                 verify = bool(payload.get("verify_hash", load_settings()["verify_hash"]))
+                mode = "move" if payload.get("mode") == "move" else "copy"
                 if not trip:
                     return self._send(400, {"error": "trip required"})
-                start_stage(trip, dry, verify)
+                # Verified-MOVE deletes source copies — gate it behind a typed
+                # confirmation and never allow it on a dry run.
+                if mode == "move" and not dry:
+                    if (payload.get("confirm") or "").strip().upper() != "MOVE":
+                        return self._send(400, {"error": "move requires confirm='MOVE'"})
+                start_stage(trip, dry, verify, mode)
                 time.sleep(0.2)
-                return self._send(200, {"started": True, "trip": trip, "dry_run": dry})
+                return self._send(200, {"started": True, "trip": trip, "dry_run": dry, "mode": mode})
             if u.path == "/api/stage/continue":
                 ok = continue_stage()
                 time.sleep(0.2)

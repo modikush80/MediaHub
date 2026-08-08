@@ -303,8 +303,9 @@
               <select id="tripSelect"></select></label>
             <label class="field">Mode
               <div class="seg" id="modeSeg">
-                <button data-dry="false" class="on">Copy</button>
-                <button data-dry="true">Dry run</button>
+                <button data-dry="false" data-mode="copy" class="on">Copy</button>
+                <button data-dry="true" data-mode="copy">Dry run</button>
+                <button data-dry="false" data-mode="move">Move ⚠︎</button>
               </div></label>
             <label class="field">Verify hash
               <span class="switch"><input type="checkbox" id="verifyChk"><span class="track"></span><span class="knob"></span></span></label>
@@ -343,6 +344,14 @@
             <div class="listcard" style="margin-top:10px"><table id="pg_errtbl"><thead><tr><th>File</th><th>Reason</th></tr></thead><tbody></tbody></table></div>
           </div>
         </div>
+
+        <h3 class="section">Consolidation log (moved / removed sources)</h3>
+        <div class="muted" id="movesInfo" style="font-size:12px;margin-bottom:8px">Move mode removes duplicate source copies (to Trash) only after the destination is hash-verified.</div>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn bordered" id="movesRefresh">Refresh</button>
+          <a class="btn bordered" href="/api/moves.csv" id="movesCsv">Download log (CSV)</a>
+        </div>
+        <div class="listcard"><table id="movesTbl"><thead><tr><th>When</th><th>Device</th><th>Removed source</th><th>Now at</th></tr></thead><tbody></tbody></table></div>
       </section>
 
       <!-- INGEST -->
@@ -560,6 +569,27 @@
       <div class="row" style="justify-content:center">
         <button class="btn bordered" id="cc_cancel">Cancel</button>
         <button class="btn primary" id="cc_confirm">Copy now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Move (consolidate) typed-confirmation sheet -->
+  <div class="sheet-bg" id="moveConfirm">
+    <div class="sheet">
+      <div class="icon" style="background:rgba(255,159,10,.18);color:var(--orange)">⚠︎</div>
+      <h3>Consolidate to one copy?</h3>
+      <p>MediaHub will copy each file to your destination, <b>hash-verify it</b>, and then
+      <b>remove the duplicate source copies to the Trash</b> (recoverable — empty the Trash to reclaim space).
+      Sources are only removed after a verified copy exists; unplugged drives are never touched.
+      Every removal is logged to the Consolidation log.</p>
+      <div class="drive" id="mv_trip">—</div>
+      <p class="muted">Destination: <code id="mv_dest"></code></p>
+      <p class="muted">Type <b>MOVE</b> to confirm:</p>
+      <input type="text" id="mv_input" aria-label="Type MOVE to confirm" placeholder="MOVE"
+             style="text-align:center;letter-spacing:2px;max-width:200px;margin:0 auto;display:block">
+      <div class="row" style="justify-content:center;margin-top:14px">
+        <button class="btn bordered" id="mv_cancel">Cancel</button>
+        <button class="btn primary" id="mv_confirm" disabled>Consolidate</button>
       </div>
     </div>
   </div>

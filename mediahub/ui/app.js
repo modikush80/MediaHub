@@ -26,7 +26,7 @@ const TITLES = {
   settings: ["Settings", ""]
 };
 
-let dryRun = false, destMode = "local";
+let dryRun = false, destMode = "local", stageMode = "copy";
 
 /* ---------- routing ---------- */
 $$(".navitem").forEach(n => n.onclick = () => {
@@ -43,7 +43,7 @@ $$(".navitem").forEach(n => n.onclick = () => {
   if (v === "sources") loadSources();
   if (v === "dedupe") loadDedupe();
   if (v === "settings") { loadSettings(); loadRecon(); loadAbout(); }
-  if (v === "stage") loadTripsForStage();
+  if (v === "stage") { loadTripsForStage(); loadMoves(); }
   if (v === "vision") loadVision();
   if (v === "search") { loadEmbedInfo(); loadSetup(); loadCaptionInfo(); }
   if (v === "culling") loadScreenshotSort();
@@ -155,7 +155,9 @@ async function loadDrives() {
 /* ---------- stage: mode / verify ---------- */
 $("#modeSeg").querySelectorAll("button").forEach(b => b.onclick = () => {
   $("#modeSeg").querySelectorAll("button").forEach(x => x.classList.remove("on"));
-  b.classList.add("on"); dryRun = b.dataset.dry === "true";
+  b.classList.add("on");
+  dryRun = b.dataset.dry === "true";
+  stageMode = b.dataset.mode || "copy";
 });
 $("#previewBtn").onclick = async () => {
   const d = await api("/api/stage/preview?trip=" + encodeURIComponent($("#tripSelect").value));
@@ -166,22 +168,51 @@ $("#previewBtn").onclick = async () => {
 };
 async function startStage() {
   $("#startBtn").disabled = true;
-  const r = await api("/api/stage/start", "POST",
-    { trip: $("#tripSelect").value, dry_run: dryRun, verify_hash: $("#verifyChk").checked });
+  const body = { trip: $("#tripSelect").value, dry_run: dryRun,
+                 verify_hash: $("#verifyChk").checked, mode: stageMode };
+  if (stageMode === "move") body.confirm = "MOVE";
+  const r = await api("/api/stage/start", "POST", body);
   if (r.error) { alert(r.error); $("#startBtn").disabled = false; return; }
   $("#progBox").classList.remove("hidden"); pollStage();
 }
 $("#startBtn").onclick = async () => {
   if (dryRun) { startStage(); return; }          // dry run: no confirmation needed
-  // Real copy: confirm first.
   const opt = $("#tripSelect").selectedOptions[0];
-  $("#cc_trip").textContent = opt ? opt.textContent : $("#tripSelect").value;
+  const label = opt ? opt.textContent : $("#tripSelect").value;
   const st = await api("/api/settings");
-  $("#cc_dest").textContent = st.dest_path + (st.dest_free_gb != null ? `  ·  ${st.dest_free_gb} GB free` : "");
-  $("#copyConfirm").classList.add("show");
+  const dest = st.dest_path + (st.dest_free_gb != null ? `  ·  ${st.dest_free_gb} GB free` : "");
+  if (stageMode === "move") {                     // verified move: typed confirmation
+    $("#mv_trip").textContent = label;
+    $("#mv_dest").textContent = dest;
+    $("#mv_input").value = ""; $("#mv_confirm").disabled = true;
+    $("#moveConfirm").classList.add("show");
+    $("#mv_input").focus();
+  } else {                                         // real copy
+    $("#cc_trip").textContent = label;
+    $("#cc_dest").textContent = dest;
+    $("#copyConfirm").classList.add("show");
+  }
 };
 $("#cc_cancel").onclick = () => $("#copyConfirm").classList.remove("show");
 $("#cc_confirm").onclick = () => { $("#copyConfirm").classList.remove("show"); startStage(); };
+$("#mv_cancel").onclick = () => $("#moveConfirm").classList.remove("show");
+$("#mv_input").addEventListener("input", () => {
+  $("#mv_confirm").disabled = $("#mv_input").value.trim().toUpperCase() !== "MOVE";
+});
+$("#mv_confirm").onclick = () => { $("#moveConfirm").classList.remove("show"); startStage(); };
+async function loadMoves() {
+  const d = await api("/api/moves");
+  const gb = ((d.reclaimable_bytes || d.reclaimed_bytes || 0) / 1e9).toFixed(1);
+  $("#movesInfo").innerHTML = `<b>${fmt(d.count || 0)}</b> source copies removed · ~<b>${gb} GB</b> reclaimable (empty Trash to free it).`;
+  const tb = $("#movesTbl tbody"); tb.innerHTML = "";
+  if (!(d.moves || []).length) { tb.innerHTML = '<tr><td colspan="4" class="muted">No consolidations yet.</td></tr>'; return; }
+  d.moves.forEach(m => tb.insertAdjacentHTML("beforeend",
+    `<tr><td class="muted" style="font-size:11px">${(m.moved_at||"").replace("T"," ")}</td>
+      <td>${m.source_device||""}</td>
+      <td class="muted" style="font-size:11px"><code>${m.source_path||""}</code></td>
+      <td class="muted" style="font-size:11px"><code>${m.dest_path||""}</code></td></tr>`));
+}
+if ($("#movesRefresh")) $("#movesRefresh").onclick = loadMoves;
 async function pollStage() {
   const s = await api("/api/stage/status");
   if (s.status === "idle") { $("#startBtn").disabled = false; return; }
