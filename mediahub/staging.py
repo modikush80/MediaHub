@@ -344,10 +344,13 @@ def _consolidate_sources(job, it, dest, mount_map):
                 continue                      # unmounted / already gone -> leave it
             if os.path.realpath(sp) == dest_real:
                 continue                      # never trash the surviving copy
-            if moves.trash_source(sp):
+            act = moves.trash_source(sp)
+            if act:
                 moves.record(it["sha256"], sp, c.get("device"), str(dest),
-                             it["size"], verified_hash=True, action="trashed")
+                             it["size"], verified_hash=True, action=act)
                 removed += 1
+            else:
+                applog.log(f"CONSOLIDATE: could not remove source {sp}")
     except Exception as e:                    # noqa: BLE001 — never fail the stage
         applog.log(f"CONSOLIDATE warn on {it.get('dest_name')}: {e}")
     it["consolidated"] = True

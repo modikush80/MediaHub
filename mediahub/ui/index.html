@@ -399,7 +399,7 @@
         </div>
 
         <h3 class="section">Consolidation log (moved / removed sources)</h3>
-        <div class="muted" id="movesInfo" style="font-size:12px;margin-bottom:8px">Move mode removes duplicate source copies (to Trash) only after the destination is hash-verified.</div>
+        <div class="muted" id="movesInfo" style="font-size:12px;margin-bottom:8px">Move mode removes duplicate source copies (to Trash or a recoverable <code>.MediaHub_Removed</code> folder) only after the destination is hash-verified.</div>
         <div class="row" style="margin-bottom:8px">
           <button class="btn bordered" id="movesRefresh">Refresh</button>
           <a class="btn bordered" href="/api/moves.csv" id="movesCsv">Download log (CSV)</a>
@@ -632,9 +632,10 @@
       <div class="icon" style="background:rgba(255,159,10,.18);color:var(--orange)">⚠︎</div>
       <h3>Consolidate to one copy?</h3>
       <p>MediaHub will copy each file to your destination, <b>hash-verify it</b>, and then
-      <b>remove the duplicate source copies to the Trash</b> (recoverable — empty the Trash to reclaim space).
-      Sources are only removed after a verified copy exists; unplugged drives are never touched.
-      Every removal is logged to the Consolidation log.</p>
+      <b>remove the duplicate source copies</b> — to the macOS Trash, or (if Trash isn't available)
+      a recoverable <code>.MediaHub_Removed</code> folder on that drive. Sources are only removed
+      after a verified copy exists; unplugged drives are never touched. Every removal is logged
+      to the Consolidation log. Delete the Trash / recycle folder later to reclaim the space.</p>
       <div class="drive" id="mv_trip">—</div>
       <p class="muted">Destination: <code id="mv_dest"></code></p>
       <p class="muted">Type <b>MOVE</b> to confirm:</p>

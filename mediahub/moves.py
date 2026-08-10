@@ -42,11 +42,9 @@ def record(sha256, source_path, source_device, dest_path, size,
         conn.close()
 
 
-def trash_source(path: str) -> bool:
-    """Move a source file to the macOS Trash (recoverable). Returns True on success.
-    Uses Finder via osascript so it lands in the correct volume's .Trashes."""
-    if not path or not os.path.exists(path):
-        return False
+def _finder_trash(path: str) -> bool:
+    """Best-effort real macOS Trash via Finder (nice 'Put Back', but needs
+    Automation permission — may be unavailable, so callers must have a fallback)."""
     script = ('tell application "Finder" to move (POSIX file %r as alias) to trash'
               % path)
     try:
@@ -55,6 +53,54 @@ def trash_source(path: str) -> bool:
         return r.returncode == 0 and not os.path.exists(path)
     except Exception:
         return False
+
+
+def _recycle_dir_for(path: str) -> str:
+    """A recoverable recycle folder on the SAME volume as `path` (so removal is a
+    fast, permission-free rename that never crosses devices)."""
+    ap = os.path.abspath(path)
+    if ap.startswith("/Volumes/"):
+        parts = ap.split("/")
+        if len(parts) > 2:
+            return os.path.join("/Volumes", parts[2], ".MediaHub_Removed")
+    # boot volume: a hidden folder in the user's home (same volume, no perms needed)
+    return os.path.expanduser("~/.MediaHub_Removed")
+
+
+def _recycle(path: str):
+    """Move `path` into the same-volume recycle folder. Returns the new path or None."""
+    rd = _recycle_dir_for(path)
+    try:
+        os.makedirs(rd, exist_ok=True)
+        base = os.path.basename(path)
+        dest = os.path.join(rd, base)
+        n = 1
+        while os.path.exists(dest):               # avoid clobbering same-named files
+            stem, ext = os.path.splitext(base)
+            dest = os.path.join(rd, f"{stem}__{n}{ext}"); n += 1
+        os.rename(path, dest)                      # same volume -> instant
+        return dest
+    except OSError:
+        try:
+            import shutil as _sh
+            dest = os.path.join(rd, os.path.basename(path))
+            _sh.move(path, dest)                   # cross-device fallback
+            return dest
+        except Exception:
+            return None
+
+
+def trash_source(path: str):
+    """Remove a verified source copy. Returns the action string on success
+    ('trashed' via Finder, or 'recycled' to the same-volume recycle folder), or
+    None on failure. Never a silent no-op — the caller logs the returned action."""
+    if not path or not os.path.exists(path):
+        return None
+    if _finder_trash(path):
+        return "trashed"
+    if _recycle(path):
+        return "recycled"
+    return None
 
 
 def moves_summary() -> dict:
